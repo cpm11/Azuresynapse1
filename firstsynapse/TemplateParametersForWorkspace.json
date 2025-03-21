@@ -8,11 +8,11 @@
 		"firstsynapse-WorkspaceDefaultSqlServer_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:firstsynapse.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
 		},
-		"firstsynapse-WorkspaceDefaultStorage_properties_typeProperties_url": {
-			"value": "https://synapsedatafactdemo.dfs.core.windows.net"
-		},
 		"external datalake_properties_typeProperties_url": {
 			"value": "https://databdataftrial.dfs.core.windows.net/"
+		},
+		"firstsynapse-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://synapsedatafactdemo.dfs.core.windows.net"
 		}
 	}
 }

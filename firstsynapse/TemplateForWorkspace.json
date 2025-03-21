@@ -12,13 +12,13 @@
 			"metadata": "Secure string for 'connectionString' of 'firstsynapse-WorkspaceDefaultSqlServer'",
 			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:firstsynapse.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
 		},
-		"firstsynapse-WorkspaceDefaultStorage_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://synapsedatafactdemo.dfs.core.windows.net"
-		},
 		"external datalake_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://databdataftrial.dfs.core.windows.net/"
+		},
+		"firstsynapse-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://synapsedatafactdemo.dfs.core.windows.net"
 		}
 	},
 	"variables": {
@@ -26,13 +26,24 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('workspaceName'), '/firstsynapdedicated')]",
-			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"name": "[concat(parameters('workspaceName'), '/external datalake')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
-				"annotations": []
+				"description": "system  assigned to manage identity ",
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('external datalake_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/firstsynapse-WorkspaceDefaultSqlServer')]",
@@ -127,6 +138,26 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/openrowset')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "CREATE MASTER KEY ENCRYPTION by PASSWORD ='XYZ_ABC256'\n\n-- CREDENTIAL -- \ncreate DATABASE SCOPED CREDENTIAL adlssynapse1\nWITH\n    IDENTITY = 'Managed Identity'\n\n--- CREATE EXTERNAL DATA Source --\nCREATE EXTERNAL DATA SOURCE ext_11\nWITH(\n    LOCATION = 'https://databdataftrial.dfs.core.windows.net/synapse',\n    CREDENTIAL = adlssynapse1\n)\n\n-- Using OPENROWSET Function --\n\nSELECT *\nFROM \nOPENROWSET(\n    BULK 'Revenue',\n    DATA_SOURCE = 'ext_11',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0'\n)as query1 \n\n-- External File Format -- \nCREATE EXTERNAL FILE FORMAT csv_format \nwith(\n    FORMAT_TYPE = DELIMITEDTEXT,\n    FORMAT_OPTIONS (\n        FIELD_TERMINATOR =','\n    )\n)\n\n-- Create External Table --\nCREATE EXTERNAL TABLE external_tbl1(\n    Dealer_ID VARCHAR(4000),\n    Model_ID VARCHAR(4000),\n    Branch_ID VARCHAR(4000),\n    Date_ID VARCHAR(4000),\n    Units_Sold VARCHAR(4000),\n    Revenue VARCHAR(4000)\n)\nwith(\n    LOCATION = 'Revenue',\n    DATA_SOURCE = ext_11,\n    FILE_FORMAT = csv_format\n)\n\nSELECT * FROM external_tbl1;\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "first ",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/firstsynapdedicated')]",
 			"type": "Microsoft.Synapse/workspaces/sqlPools",
 			"apiVersion": "2019-06-01-preview",
@@ -139,32 +170,12 @@
 			"location": "eastus2"
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/external datalake')]",
-			"type": "Microsoft.Synapse/workspaces/linkedServices",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"description": "system  assigned to manage identity ",
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('external datalake_properties_typeProperties_url')]"
-				},
-				"connectVia": {
-					"referenceName": "AutoResolveIntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/openrowset')]",
+			"name": "[concat(parameters('workspaceName'), '/external_table')]",
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "CREATE MASTER KEY ENCRYPTION by PASSWORD ='XYZ_ABC256'\n\n-- CREDENTIAL -- \ncreate DATABASE SCOPED CREDENTIAL adlssynapse1\nWITH\n    IDENTITY = 'Managed Identity'\n\n--- CREATE EXTERNAL DATA Source --\nCREATE EXTERNAL DATA SOURCE ext_11\nWITH(\n    LOCATION = 'https://databdataftrial.dfs.core.windows.net/synapse',\n    CREDENTIAL = adlssynapse1\n)\n\n-- Using OPENROWSET Function --\n\nSELECT *\nFROM \nOPENROWSET(\n    BULK 'Revenue',\n    DATA_SOURCE = 'ext_11',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0'\n)as query1 \n",
+					"query": "-- Create External Table --\nCREATE EXTERNAL TABLE external_tbl1(\n    Dealer_ID VARCHAR(4000),\n    Model_ID VARCHAR(4000),\n    Branch_ID VARCHAR(4000),\n    Date_ID VARCHAR(4000),\n    Units_Sold VARCHAR(4000),\n    Revenue VARCHAR(4000)\n)\nwith(\n    LOCATION = 'Revenue',\n    DATA_SOURCE = ext_11,\n    FILE_FORMAT = csv_format\n)\n\nSELECT * FROM external_tbl1;",
 					"metadata": {
 						"language": "sql"
 					},
@@ -175,6 +186,24 @@
 					"resultLimit": 5000
 				},
 				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/CETAS')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "first ",
+						"poolName": "Built-in"
+					}
+				}
 			},
 			"dependsOn": []
 		}
