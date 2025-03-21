@@ -2,7 +2,7 @@
 	"name": "openrowset",
 	"properties": {
 		"content": {
-			"query": "CREATE MASTER KEY ENCRYPTION by PASSWORD ='XYZ_ABC256'\n\n-- CREDENTIAL -- \ncreate DATABASE SCOPED CREDENTIAL adlssynapse1\nWITH\n    IDENTITY = 'Managed Identity'\n\n--- CREATE EXTERNAL DATA Source --\nCREATE EXTERNAL DATA SOURCE ext_11\nWITH(\n    LOCATION = 'https://databdataftrial.dfs.core.windows.net/synapse',\n    CREDENTIAL = adlssynapse1\n)\n\n-- Using OPENROWSET Function --\n\nSELECT *\nFROM \nOPENROWSET(\n    BULK 'Revenue',\n    DATA_SOURCE = 'ext_11',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0'\n)as query1 \n",
+			"query": "CREATE MASTER KEY ENCRYPTION by PASSWORD ='XYZ_ABC256'\n\n-- CREDENTIAL -- \ncreate DATABASE SCOPED CREDENTIAL adlssynapse1\nWITH\n    IDENTITY = 'Managed Identity'\n\n--- CREATE EXTERNAL DATA Source --\nCREATE EXTERNAL DATA SOURCE ext_11\nWITH(\n    LOCATION = 'https://databdataftrial.dfs.core.windows.net/synapse',\n    CREDENTIAL = adlssynapse1\n)\n\n-- Using OPENROWSET Function --\n\nSELECT *\nFROM \nOPENROWSET(\n    BULK 'Revenue',\n    DATA_SOURCE = 'ext_11',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0'\n)as query1 \n\n-- External File Format -- \nCREATE EXTERNAL FILE FORMAT csv_format \nwith(\n    FORMAT_TYPE = DELIMITEDTEXT,\n    FORMAT_OPTIONS (\n        FIELD_TERMINATOR =','\n    )\n)\n\n-- Create External Table --\nCREATE EXTERNAL TABLE external_tbl1(\n    Dealer_ID VARCHAR(4000),\n    Model_ID VARCHAR(4000),\n    Branch_ID VARCHAR(4000),\n    Date_ID VARCHAR(4000),\n    Units_Sold VARCHAR(4000),\n    Revenue VARCHAR(4000)\n)\nwith(\n    LOCATION = 'Revenue',\n    DATA_SOURCE = ext_11,\n    FILE_FORMAT = csv_format\n)\n\nSELECT * FROM external_tbl1;\n",
 			"metadata": {
 				"language": "sql"
 			},
