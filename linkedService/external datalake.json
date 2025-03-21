@@ -1,0 +1,15 @@
+{
+	"name": "external datalake",
+	"properties": {
+		"description": "system  assigned to manage identity ",
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "https://databdataftrial.dfs.core.windows.net/"
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
