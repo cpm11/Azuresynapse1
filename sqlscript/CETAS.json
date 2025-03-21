@@ -1,0 +1,17 @@
+{
+	"name": "CETAS",
+	"properties": {
+		"content": {
+			"query": "-- CETAS --\nCREATE EXTERNAL TABLE ext_cetas_tbl\nwith(\n    LOCATION = 'ext_cetas',\n    DATA_SOURCE = ext_11,\n    FILE_FORMAT = parquet_format\n)\nAS\nSELECT *\nFROM \nOPENROWSET(\n    BULK 'Revenue',\n    DATA_SOURCE = 'ext_11',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0'\n)as query1 \n\nSELECT * from ext_cetas_tbl\n\n\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "first ",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
