@@ -1,0 +1,17 @@
+{
+	"name": "openrowset",
+	"properties": {
+		"content": {
+			"query": "CREATE MASTER KEY ENCRYPTION by PASSWORD ='XYZ_ABC256'\n\n-- CREDENTIAL -- \ncreate DATABASE SCOPED CREDENTIAL adlssynapse1\nWITH\n    IDENTITY = 'Managed Identity'\n\n--- CREATE EXTERNAL DATA Source --\nCREATE EXTERNAL DATA SOURCE ext_11\nWITH(\n    LOCATION = 'https://databdataftrial.dfs.core.windows.net/synapse',\n    CREDENTIAL = adlssynapse1\n)\n\n-- Using OPENROWSET Function --\n\nSELECT *\nFROM \nOPENROWSET(\n    BULK 'Revenue',\n    DATA_SOURCE = 'ext_11',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0'\n)as query1 \n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "first ",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
