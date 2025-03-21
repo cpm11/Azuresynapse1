@@ -10,6 +10,9 @@
 		},
 		"firstsynapse-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://synapsedatafactdemo.dfs.core.windows.net"
+		},
+		"external datalake_properties_typeProperties_url": {
+			"value": "https://databdataftrial.dfs.core.windows.net/"
 		}
 	}
 }
