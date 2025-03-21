@@ -103,6 +103,26 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/distrubted_table_types')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "--- round robin table ---\n\nCREATE Table round_rob\n(\n    id INT,\n    name varchar(4000),\n    salary INT\n)\nWITH\n( \n    DISTRIBUTION = ROUND_ROBIN\n)\n\n-- Replicate Table --\n\nCREATE SCHEMA first1replicate;\n\nCREATE TABLE first1replicate.repli_table\n(\n    dim_key INT,\n    dim_name VARCHAR(4000),\n    dim_salary INT\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE\n)\n\n--- Hash table ---\nCREATE TABLE HASH_first\n(\n    hash_key INT,\n    hash_name VARCHAR(4000),\n    hash_sal  INT\n)\nWITH\n(\n    DISTRIBUTION = HASH(hash_key)\n)",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "firstsynapdedicated",
+						"poolName": "firstsynapdedicated"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/firstsynapdedicated')]",
 			"type": "Microsoft.Synapse/workspaces/sqlPools",
 			"apiVersion": "2019-06-01-preview",
