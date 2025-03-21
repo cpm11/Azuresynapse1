@@ -1,0 +1,17 @@
+{
+	"name": "distrubted_table_types",
+	"properties": {
+		"content": {
+			"query": "--- round robin table ---\n\nCREATE Table round_rob\n(\n    id INT,\n    name varchar(4000),\n    salary INT\n)\nWITH\n( \n    DISTRIBUTION = ROUND_ROBIN\n)",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "firstsynapdedicated",
+				"poolName": "firstsynapdedicated"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
