@@ -143,7 +143,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "CREATE MASTER KEY ENCRYPTION by PASSWORD ='XYZ_ABC256'\n\n-- CREDENTIAL -- \ncreate DATABASE SCOPED CREDENTIAL adlssynapse1\nWITH\n    IDENTITY = 'Managed Identity'\n\n--- CREATE EXTERNAL DATA Source --\nCREATE EXTERNAL DATA SOURCE ext_11\nWITH(\n    LOCATION = 'https://databdataftrial.dfs.core.windows.net/synapse',\n    CREDENTIAL = adlssynapse1\n)\n\n-- Using OPENROWSET Function --\n\nSELECT *\nFROM \nOPENROWSET(\n    BULK 'Revenue',\n    DATA_SOURCE = 'ext_11',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0'\n)as query1 \n\n-- External File Format -- \nCREATE EXTERNAL FILE FORMAT csv_format \nwith(\n    FORMAT_TYPE = DELIMITEDTEXT,\n    FORMAT_OPTIONS (\n        FIELD_TERMINATOR =','\n    )\n)\n\n-- Create External Table --\nCREATE EXTERNAL TABLE external_tbl1(\n    Dealer_ID VARCHAR(4000),\n    Model_ID VARCHAR(4000),\n    Branch_ID VARCHAR(4000),\n    Date_ID VARCHAR(4000),\n    Units_Sold VARCHAR(4000),\n    Revenue VARCHAR(4000)\n)\nwith(\n    LOCATION = 'Revenue',\n    DATA_SOURCE = ext_11,\n    FILE_FORMAT = csv_format\n)\n\nSELECT * FROM external_tbl1;\n",
+					"query": "CREATE MASTER KEY ENCRYPTION by PASSWORD ='XYZ_ABC256'\n\n-- CREDENTIAL -- \ncreate DATABASE SCOPED CREDENTIAL adlssynapse1\nWITH\n    IDENTITY = 'Managed Identity'\n\n--- CREATE EXTERNAL DATA Source --\nCREATE EXTERNAL DATA SOURCE ext_11\nWITH(\n    LOCATION = 'https://databdataftrial.dfs.core.windows.net/synapse',\n    CREDENTIAL = adlssynapse1\n)\n\n-- Using OPENROWSET Function --\n\nSELECT *\nFROM \nOPENROWSET(\n    BULK 'Revenue',\n    DATA_SOURCE = 'ext_11',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0'\n)as query1 \n\n-- External File Format -- \nCREATE EXTERNAL FILE FORMAT csv_format \nwith(\n    FORMAT_TYPE = DELIMITEDTEXT,\n    FORMAT_OPTIONS (\n        FIELD_TERMINATOR =','\n    )\n)\n\n-- Create External Table --\nCREATE EXTERNAL TABLE external_tbl1(\n    Dealer_ID VARCHAR(4000),\n    Model_ID VARCHAR(4000),\n    Branch_ID VARCHAR(4000),\n    Date_ID VARCHAR(4000),\n    Units_Sold VARCHAR(4000),\n    Revenue VARCHAR(4000)\n)\nwith(\n    LOCATION = 'Revenue',\n    DATA_SOURCE = ext_11,\n    FILE_FORMAT = csv_format\n)\n\nSELECT * FROM external_tbl1;\n\nCREATE EXTERNAL FILE FORMAT parquet_format\nWITH(\n    FORMAT_TYPE = PARQUET, \n   \n)\n",
 					"metadata": {
 						"language": "sql"
 					},
@@ -195,15 +195,57 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"content": {
-					"query": "",
+					"query": "-- CETAS --\nCREATE EXTERNAL TABLE ext_cetas_tbl\nwith(\n    LOCATION = 'ext_cetas',\n    DATA_SOURCE = ext_11,\n    FILE_FORMAT = parquet_format\n)\nAS\nSELECT *\nFROM \nOPENROWSET(\n    BULK 'Revenue',\n    DATA_SOURCE = 'ext_11',\n    FORMAT = 'CSV',\n    PARSER_VERSION = '2.0'\n)as query1 \n\nSELECT * from ext_cetas_tbl\n\n\n",
 					"metadata": {
 						"language": "sql"
 					},
 					"currentConnection": {
 						"databaseName": "first ",
 						"poolName": "Built-in"
-					}
-				}
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/COPY INTO')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "create TABLE copy_into_table(\n     Dealer_ID VARCHAR(4000),\n    Model_ID VARCHAR(4000),\n    Branch_ID VARCHAR(4000),\n    Date_ID VARCHAR(4000),\n    Units_Sold VARCHAR(4000),\n    Revenue VARCHAR(4000)\n)\nWITH(\n    DISTRIBUTION = ROUND_ROBIN\n)\n\n\n-- Loading DATA\nCOPY INTO copy_into_table(\n    Dealer_ID,\n    Model_ID,\n    Branch_ID,\n    Date_ID,\n    Units_Sold,\n    Revenue \n)\nFROM 'https://databdataftrial.DFS.core.windows.net/synapse/ext_cetas/'\nWITH(\n    FILE_TYPE = 'PARQUET',\n    CREDENTIAL = adlssynapse2  \n)",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "firstsynapdedicated",
+						"poolName": "firstsynapdedicated"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "-- CREDENTIAL -- \ncreate DATABASE SCOPED CREDENTIAL adlssynapse2\nWITH\n    IDENTITY = 'Managed Identity'\n\n--- CREATE EXTERNAL DATA Source --\nCREATE EXTERNAL DATA SOURCE ext_112\nWITH(\n    LOCATION = 'https://databdataftrial.dfs.core.windows.net/synapse',\n    CREDENTIAL = adlssynapse1\n)",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "firstsynapdedicated",
+						"poolName": "firstsynapdedicated"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
 			},
 			"dependsOn": []
 		}
