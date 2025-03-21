@@ -2,7 +2,7 @@
 	"name": "distrubted_table_types",
 	"properties": {
 		"content": {
-			"query": "--- round robin table ---\n\nCREATE Table round_rob\n(\n    id INT,\n    name varchar(4000),\n    salary INT\n)\nWITH\n( \n    DISTRIBUTION = ROUND_ROBIN\n)",
+			"query": "--- round robin table ---\n\nCREATE Table round_rob\n(\n    id INT,\n    name varchar(4000),\n    salary INT\n)\nWITH\n( \n    DISTRIBUTION = ROUND_ROBIN\n)\n\n-- Replicate Table --\n\nCREATE SCHEMA first1replicate;\n\nCREATE TABLE first1replicate.repli_table\n(\n    dim_key INT,\n    dim_name VARCHAR(4000),\n    dim_salary INT\n)\nWITH\n(\n    DISTRIBUTION = REPLICATE\n)\n\n--- Hash table ---\nCREATE TABLE HASH_first\n(\n    hash_key INT,\n    hash_name VARCHAR(4000),\n    hash_sal  INT\n)\nWITH\n(\n    DISTRIBUTION = HASH(hash_key)\n)",
 			"metadata": {
 				"language": "sql"
 			},
