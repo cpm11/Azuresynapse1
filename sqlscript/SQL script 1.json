@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 1",
+	"properties": {
+		"content": {
+			"query": "-- CREDENTIAL -- \ncreate DATABASE SCOPED CREDENTIAL adlssynapse2\nWITH\n    IDENTITY = 'Managed Identity'\n\n--- CREATE EXTERNAL DATA Source --\nCREATE EXTERNAL DATA SOURCE ext_112\nWITH(\n    LOCATION = 'https://databdataftrial.dfs.core.windows.net/synapse',\n    CREDENTIAL = adlssynapse1\n)",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "firstsynapdedicated",
+				"poolName": "firstsynapdedicated"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
